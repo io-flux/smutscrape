@@ -1,0 +1,56 @@
+name: IncestFlix
+domain: incestflix.com
+base_url: "http://www.incestflix.com"
+selector_style: css
+
+url_encoding_rules:
+  " ": "-"
+  "%20": "-"
+
+modes:
+  video:
+    url_pattern: "/watch/{video_id}"
+    scraper: video_scraper
+  search:
+    url_pattern: "/tag/{search}"
+    scraper: list_scraper
+  double_search:
+    url_pattern: "/tag/{search1}/and/{search2}"
+    scraper: list_scraper
+
+download:
+  command: 'curl -# -L -o "{destination_path}" -A "{user_agent}" "{url}"'
+
+scrapers:
+  video_scraper:
+    title:
+      selector: "h2"
+    download_url:
+      selector: "div#incflix-stream source"
+      attribute: "src"
+    tags:
+      selector: "div#videotags a[class^='studiolink']"
+    genres:
+      selector: "div#videotags a.studiolink0, div#videotags a.studiolink3, div#videotags a.studiolink4"
+    actors:
+      selector: "div#videotags a.studiolink1"
+    producers:
+      selector: "div#videotags a.studiolink2"
+
+  list_scraper:
+    video_container:
+      selector:
+        - "body"
+    video_item:
+      selector: "a#videolink"
+      fields:
+        url:
+          attribute: "href"
+        title:
+          attribute: "title"
+    pagination:
+      first_page: "{url_pattern}"
+      subsequent_pages: "{url_pattern}/page/{page}"
+      max_pages: 999
+
+video_key_pattern: "/watch/"
