@@ -1,0 +1,58 @@
+name: Pornhub
+domain: pornhub.com
+base_url: "https://www.pornhub.com"
+selector_style: css
+
+modes:
+  video:
+    url_pattern: "/view_video.php?viewkey={video_id}"
+    scraper: video_scraper
+  model:
+    url_pattern: "/model/{model}"
+    scraper: list_scraper
+  category:
+    url_pattern: "/categories/{category}"
+    scraper: list_scraper
+  channel:
+    url_pattern: "/channels/{channel}"
+    scraper: list_scraper
+  search:
+    url_pattern: "/video/search?search={search}"
+    scraper: list_scraper
+
+download:
+  command: 'yt-dlp -o "{destination_path}" "{url}"'
+
+scrapers:
+  video_scraper:
+    title:
+      selector: "head title"
+    download_url:
+      selector: "meta[property='og:video']"
+      attribute: "content"
+
+  list_scraper:
+    video_container:
+      selector:
+        - "ul#videoSearchResult"
+        - "ul#pornstarsVideoSection"
+        - "ul.pornstarsVideos"
+        - "ul.mostRecentPornstarVideos"
+        - "ul#moreData"
+    video_item:
+      selector: "li.pcVideoListItem"
+      fields:
+        video_key:
+          attribute: "data-video-vkey"
+        title:
+          selector: "span.title a"
+          attribute: "title"
+        url:
+          selector: "a.linkVideoThumb"
+          attribute: "href"
+    pagination:
+      next_page:
+        selector: "li.page_next a"
+        attribute: "href"
+
+video_key_pattern: "/view_video.php?viewkey="
