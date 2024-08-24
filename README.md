@@ -3,7 +3,7 @@ Just a scraper for smut, folks. 🍆
 No one is responsible for how you use it except you. Please scrape responsibly.
 
 ## Installation:
-1. `git clone git@github.com:io-flux/smutscrape.git`
+1. `git clone https://github.com/io-flux/smutscrape.git`
 2. `cd smutscrape`
 3. If you're using conda or virtual environment:
       `pip install -r requirements.txt`
