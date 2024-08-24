@@ -15,16 +15,8 @@ download_destinations: # This is an ordered list of priorities. The script will 
 
 ignored: # The script will avoid videos with these tags.
   - "JOI"
-  - "Femdom"
   - "Virtual Sex"
-  - "Asian"
-  - "Japanese"
-  - "JAV"
-  - "Uncensored JAV"
   - "Scat"
-  - "Perverse Family"
-  - "Sydney Harwin"
-  - "Xev Bellringer"
 
 vpn: # 
     enabled: true
