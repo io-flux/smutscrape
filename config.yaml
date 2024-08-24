@@ -1,0 +1,58 @@
+download_destinations: # This is an ordered list of priorities. The script will download to the first destination that it is able to successfully.
+  - type: smb # Omit this section if you're not using an SMB share
+    server: "192.168.50.5" # Replace this with the IP of your SMB share if you're using one
+    share: "Media" # Replace this with the name of your SMB share if you're using one
+    path: "XXX" # Replace this with the folder on your SMB share where videos should be saved
+    username: "SMB_User" # Replace this with the SMB username
+    password: "SMB_Password" # Replace this with the SMB password
+  - type: webdav # Omit this section if you're not using a webdav share
+    url: "https://example.com/webdav" # Replace this with the URL to your webdav share
+    path: "videos" # Replace this with the folder on your webdav share where videos should be saved
+    username: "user" # Replace this with the webdav username
+    password: "password" # Replace this with the webdav password
+  - type: local
+    path: "~/.xxx" # Replace this with the local folder where videos should be saved
+
+ignored: # The script will avoid videos with these tags.
+  - "JOI"
+  - "Femdom"
+  - "Virtual Sex"
+  - "Asian"
+  - "Japanese"
+  - "JAV"
+  - "Uncensored JAV"
+  - "Scat"
+  - "Perverse Family"
+  - "Sydney Harwin"
+  - "Xev Bellringer"
+
+vpn: # 
+    enabled: true
+    vpn_bin: "/usr/bin/protonvpn-cli" # Replace this with the path to your VPN, if used, and update the keys below accordingly.
+    start_cmd: "{vpn_bin} connect"
+    stop_cmd: "{vpn_bin} disconnect"
+    new_node_cmd: "{vpn_bin} connect --random"
+    new_node_time: 300
+
+## STOP! There's generally no need to configure anything past here. ##
+    
+sleep:
+  between_videos: 3
+  between_pages: 5
+  
+file_naming:
+  invalid_chars: "/:*?\"<>|'"
+  extension: ".mp4"
+    
+user_agents:
+ - "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"
+ - "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"
+ - "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Safari/605.1.15"
+ - "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.107 Safari/537.36"
+ - "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:90.0) Gecko/20100101 Firefox/90.0"
+
+default_site: "ph" # Not presently implemented
+favorite: # Not presently implemented
+  - if:
+    - "bs"
+    - "familytherapyxxx"
