@@ -1,0 +1,63 @@
+## NOTE: This configuration is a presently-broken WIP.
+
+name: Motherless
+domain: motherless.com
+base_url: "https://motherless.com"
+selector_style: xpath
+
+url_encoding_rules:
+  " ": "+"
+
+modes:
+  video:
+    url_pattern: "/{video_id}"
+    scraper: video_scraper
+  search:
+    url_pattern: "/term/{search}"
+    scraper: list_scraper
+
+download:
+  command: 'curl -L -k -o "{destination_path}" "{url}"'
+
+scrapers:
+  video_scraper:
+    title:
+      selector: "//div[@class='media-meta']//h1/text()"
+    date:
+      selector: "//div[@class='media-meta']//div[@class='media-meta-stats']/span[not(contains(.,'Views')) and not(contains(.,'Favorites'))]/text()"
+    image:
+      selector: "//video/@data-poster"
+    tags:
+      selector: "//h4/a[contains(@href,'/term/')]/text()"
+    download_url:
+      selector: "//video/source/@src"
+
+  list_scraper:
+    video_container:
+      selector:
+        - "//div[h2[contains(., 'Videos')]]"
+    video_item:
+      selector: ".//a[contains(@class, 'img-container')]"
+      fields:
+        title:
+          selector: "..//a[@title]/@title"
+        url:
+          selector: "..//a[@title]/@href"
+        image:
+          selector: ".//img[@class='static']/@src"
+        studio:
+          selector: "..//a[@class='uploader']/text()"
+    pagination:
+      next_page:
+        selector: "//a[@class='next']"
+        attribute: "href"
+
+video_key_pattern: "/([0-9A-Za-z]{7,8})"
+
+selenium:
+  enabled: true
+  options:
+    - "--no-sandbox"
+    - "--disable-dev-shm-usage"
+    - "--binary=/usr/bin/google-chrome"
+  wait_time: 10
