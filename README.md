@@ -10,6 +10,7 @@ No one is responsible for how you use it except you. Please scrape responsibly.
    Otherwise:
       `pip3 install -r requirements.txt`
 5. Customize `config.yaml` file to your specifications.
+6. `chmod +x scrape.py`
 
 ## Usage:
 `./scrape.py {{ site config abbreviation per the configs folder }} search "{{ query }}"`
