@@ -28,13 +28,13 @@ pip install -r requirements.txt
 pip3 install -r requirements.txt
 ```
 
-3. **Customize `config.yaml` file to your system/needs.** ⚙️
+3. **Customize `config.yaml` file to your system/needs. ⚙️**
 🛠️ Pay particular attention to these sections:
  - `download_destinations` 💾
  - `ignored` 🚫
  - `vpn` 🤫
    
-4. Make script executable. 🚀
+4. **Make script executable. 🚀**
 ```bash
 chmod +x scrape.py
 ```
@@ -52,6 +52,35 @@ sudo ln -s $(realpath ./scrape.py) /usr/local/bin/scrape
 ```bash
 cd smutscrape # if not already in the repo folder
 ./scrape.py {{ site config abbreviation per the configs folder }} search "{{ query }}"
+```
+
+### Supported sites & modes 🌐
+Some sites have other list modes besides `search`. The following sites and modes are presently supported:
+- `9v`: **9vids.com**
+  * `search`
+- `if`: **incestflix.com**
+  * `search`
+  * `double_search`
+- `lf`: **lonefun.com**
+  * `search`
+- `ph`: **pornhub.com**
+  * `search`
+  * `category`
+  * `channel`
+  * `model`
+- `sb`: **spankbang.com**
+  * `search`
+  * `tag`
+  * `model`
+
+### Direct video downloading 🎯
+
+In addition to the modes specified for each site below, you can always download individual videos using the direct URL by specifying a valid URL from one of the sites with a .yaml. For example: 
+
+***🛀🧒🏻💦👩🏻 To download the video "Taboo mom son bath" from SpankBang: ***
+
+```bash
+scrape https://spankbang.com/2ei5s/video/taboo+mom+son+bath
 ```
 
 ### Examples 🧐
@@ -79,35 +108,6 @@ scrape {{ site config abbreviation per the configs folder }} search "{{ query }}
 scrape sb tag "family"
 ```
 
-### Direct video downloading 🎯
-
-In addition to the modes specified for each site below, you can always download individual videos using the direct URL by specifying a valid URL from one of the sites with a .yaml. For example: 
-
-***🛀🧒🏻💦👩🏻 To download the video "Taboo mom son bath" from SpankBang: ***
-
-```bash
-scrape https://spankbang.com/2ei5s/video/taboo+mom+son+bath
-```
-
-
-## Supported sites & modes 🌐
-Some sites have other list modes besides `search`. The following sites and modes are presently supported:
-- `9v`: **9vids.com**
-  * `search`
-- `if`: **incestflix.com**
-  * `search`
-  * `double_search`
-- `lf`: **lonefun.com**
-  * `search`
-- `ph`: **pornhub.com**
-  * `search`
-  * `category`
-  * `channel`
-  * `model`
-- `sb`: **spankbang.com**
-  * `search`
-  * `tag`
-  * `model`
 
 ## Contributions 🤝
 Please feel free to help grow the `./configs/` library! 📚
