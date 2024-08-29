@@ -18,7 +18,7 @@ import io
 import shlex
 import json
 
-SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 CONFIG_DIR = os.path.join(SCRIPT_DIR, 'configs')
 
 last_vpn_action_time = 0
