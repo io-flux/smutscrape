@@ -51,11 +51,11 @@ sudo ln -s $(realpath ./scrape.py) /usr/local/bin/scrape
 
 ```bash
 cd smutscrape # if not already in the repo folder
-./scrape.py {{ site config abbreviation per the configs folder }} search "{{ query }}"
+./scrape.py {{ site abbreviation }} {{ mode }} "{{ query }}"
 ```
 
 ### Supported sites & modes 🌐
-Some sites have other list modes besides `search`. The following sites and modes are presently supported:
+The following sites and modes are presently supported:
 - `9v`: **9vids.com**
   * `search`
 - `if`: **incestflix.com**
@@ -73,15 +73,7 @@ Some sites have other list modes besides `search`. The following sites and modes
   * `tag`
   * `model`
 
-### Direct video downloading 🎯
-
-In addition to the modes specified for each site below, you can always download individual videos using the direct URL by specifying a valid URL from one of the sites with a .yaml. For example: 
-
-*** 🛀🧒🏻💦👩🏻 To download the video "Taboo mom son bath" from SpankBang: ***
-
-```bash
-scrape https://spankbang.com/2ei5s/video/taboo+mom+son+bath
-```
+**Note:** In addition to the modes specified for each site above, you can always download individual videos using the direct URL by specifying a valid URL from one of the sites with a .yaml.
 
 ### Examples 🧐
 #### 👧 *To download all videos from 9vids.com's "sister" search results:*
@@ -90,20 +82,25 @@ scrape https://spankbang.com/2ei5s/video/taboo+mom+son+bath
 ./scrape.py 9v search sister` 
 ```
 
-
 #### 🦉 *To download all videos from the model "owlcrystal" on pornhub.com:*
 ```bash
 ./scrape.py ph model "owlcrystal"
-``` 
+```
+
+#### 🛀🧒🏻💦👩🏻 *To download the video "Taboo mom son bath" from SpankBang:*
+
+```bash
+./scrape https://spankbang.com/2ei5s/video/taboo+mom+son+bath
+```
 
 ### Symlink Usage 🔗
 Note: if you take the optional step of creating a symlink at `/usr/local/bin/scrape`, you can run the `scrape` (instead of `./scrape.py`) command from any folder and don't need to `cd smutscrape` first: 
 
 ```bash
-scrape {{ site config abbreviation per the configs folder }} search "{{ query }}"
+scrape {{ site config abbreviation per the configs folder }} {{ mode }} "{{ query }}"
 ```
 
-***👨‍👩‍👧‍👦 So now, for example, to download all videos from the "family" tag on spankbang.com: ***
+👨‍👩‍👧‍👦 *So now, for example, to download all videos from the "family" tag on spankbang.com:*
 ```bash
 scrape sb tag "family"
 ```
