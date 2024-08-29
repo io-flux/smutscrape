@@ -77,7 +77,7 @@ Some sites have other list modes besides `search`. The following sites and modes
 
 In addition to the modes specified for each site below, you can always download individual videos using the direct URL by specifying a valid URL from one of the sites with a .yaml. For example: 
 
-***🛀🧒🏻💦👩🏻 To download the video "Taboo mom son bath" from SpankBang: ***
+*** 🛀🧒🏻💦👩🏻 To download the video "Taboo mom son bath" from SpankBang: ***
 
 ```bash
 scrape https://spankbang.com/2ei5s/video/taboo+mom+son+bath
