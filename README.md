@@ -3,7 +3,7 @@
 A Python-based scraper for downloading adult content from various websites. 😈
 
 ## Requirements 🧰
-- Python 3.6+ 🐍
+- Python 3.10+ 🐍
 - pip 📦
 - Optional: conda 🐼
 
