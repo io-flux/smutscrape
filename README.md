@@ -84,14 +84,14 @@ scrape https://spankbang.com/2ei5s/video/taboo+mom+son+bath
 ```
 
 ### Examples 🧐
-***👧 To download all videos from 9vids.com's "sister" search results: ***
+#### 👧 *To download all videos from 9vids.com's "sister" search results:*
 
 ```bash
 ./scrape.py 9v search sister` 
 ```
 
 
-***🦉 To download all videos from the model "owlcrystal" on pornhub.com: ***
+#### 🦉 *To download all videos from the model "owlcrystal" on pornhub.com:*
 ```bash
 ./scrape.py ph model "owlcrystal"
 ``` 
