@@ -22,6 +22,7 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 CONFIG_DIR = os.path.join(SCRIPT_DIR, 'configs')
 
 last_vpn_action_time = 0
+session = requests.Session()
 
 def load_config(config_file):
     with open(config_file, 'r') as file:
@@ -48,9 +49,7 @@ def construct_url(base_url, pattern, site_config, **kwargs):
     encoded_kwargs = {}
     for k, v in kwargs.items():
         if isinstance(v, str):
-            # First, apply standard URL encoding
             encoded_v = urllib.parse.quote(v)
-            # Then apply custom encoding rules
             for original, replacement in encoding_rules.items():
                 encoded_v = encoded_v.replace(original, replacement)
             encoded_kwargs[k] = encoded_v
@@ -60,12 +59,14 @@ def construct_url(base_url, pattern, site_config, **kwargs):
     path = pattern.format(**encoded_kwargs)
     return urllib.parse.urljoin(base_url, path)
 
-def fetch_page(url, user_agents):
-    chosen_agent = random.choice(user_agents)
-    logger.debug(f"Using User-Agent: {chosen_agent}")
-    headers = {"User-Agent": chosen_agent}
+def fetch_page(url, user_agents, headers):
+    if 'User-Agent' not in headers:
+        headers['User-Agent'] = random.choice(user_agents)
+    logger.debug(f"Fetching URL: {url}")
+    logger.debug(f"Using headers: {headers}")
+    time.sleep(random.uniform(1, 3))  # Random delay between requests
     try:
-        response = requests.get(url, headers=headers, timeout=30)
+        response = session.get(url, headers=headers, timeout=30)
         response.raise_for_status()
         return BeautifulSoup(response.content, "html.parser")
     except requests.exceptions.RequestException as e:
@@ -103,13 +104,16 @@ def extract_data(soup, selectors):
                 except json.JSONDecodeError:
                     logger.error(f"Failed to parse JSON for field {field}")
 
+            if field in ['tags', 'genres', 'actors', 'producers']:
+                value = [element.text.strip() for element in elements]
+
             data[field] = value
         logger.debug(f"Extracted data for {field}: {data.get(field)}")
     return data
 
-def process_list_page(url, site_config, general_config, current_page=1, mode=None, identifier=None, overwrite_files=False):
+def process_list_page(url, site_config, general_config, current_page=1, mode=None, identifier=None, overwrite_files=False, headers=None):
     logger.info(f"Processing list page: {url}")
-    soup = fetch_page(url, general_config['user_agents'])
+    soup = fetch_page(url, general_config['user_agents'], headers)
     if soup is None:
         logger.error(f"Failed to fetch list page: {url}")
         return None, None
@@ -155,7 +159,7 @@ def process_list_page(url, site_config, general_config, current_page=1, mode=Non
         video_title = video_data.get('title', '') or video_element.text.strip()
 
         logger.info(f"Found video: {video_title} - {video_url}")
-        process_video_page(video_url, site_config, general_config, overwrite_files)
+        process_video_page(video_url, site_config, general_config, overwrite_files, headers)
 
     logger.debug("Looking for next page")
     pagination_config = list_scraper.get('pagination', {})
@@ -181,7 +185,6 @@ def process_list_page(url, site_config, general_config, current_page=1, mode=Non
                 search=identifier
             )
         else:
-            # Fall back to the existing method of finding the next page link
             next_page = soup.select_one(pagination_config.get('next_page', {}).get('selector', ''))
             next_url = next_page.get(pagination_config.get('next_page', {}).get('attribute', '')) if next_page else None
 
@@ -196,17 +199,25 @@ def process_list_page(url, site_config, general_config, current_page=1, mode=Non
     logger.debug("No next page found or reached maximum pages")
     return None, None
 
-def should_ignore_video(title, tags, ignored_tags):
-    title_lower = title.lower()
-    for tag in ignored_tags:
-        if tag.lower() in title_lower or tag in tags:
-            return True
+def should_ignore_video(data, ignored_terms):
+    for term in ignored_terms:
+        term_lower = term.lower()
+        url_encoded_term = term.lower().replace(' ', '-')
+        for field, value in data.items():
+            if isinstance(value, str):
+                if term_lower in value.lower() or url_encoded_term in value.lower():
+                    logger.info(f"Ignoring video due to term '{term}' found in {field}")
+                    return True
+            elif isinstance(value, list):
+                for item in value:
+                    if term_lower in item.lower() or url_encoded_term in item.lower():
+                        logger.info(f"Ignoring video due to term '{term}' found in {field}")
+                        return True
     return False
 
-def process_video_page(url, site_config, general_config, overwrite_files=False):
+def process_video_page(url, site_config, general_config, overwrite_files=False, headers=None):
     global last_vpn_action_time
 
-    # Check if we need to switch to a new VPN node
     vpn_config = general_config.get('vpn', {})
     if vpn_config.get('enabled', False):
         current_time = time.time()
@@ -214,18 +225,19 @@ def process_video_page(url, site_config, general_config, overwrite_files=False):
             handle_vpn(general_config, 'new_node')
 
     logger.info(f"Processing video page: {url}")
-    soup = fetch_page(url, general_config['user_agents'])
+    soup = fetch_page(url, general_config['user_agents'], headers)
     if soup is None:
         logger.error(f"Failed to fetch video page: {url}")
         return
 
     data = extract_data(soup, site_config['scrapers']['video_scraper'])
-    file_name = construct_filename(data['title'], site_config, general_config)
-    tags = data.get('tags', []) if 'tags' in site_config['scrapers']['video_scraper'] else []
 
-    if should_ignore_video(file_name, tags, general_config['ignored']):
-        logger.info(f"Ignoring video: {file_name}")
+    # Check if the video should be ignored
+    if should_ignore_video(data, general_config['ignored']):
+        logger.info(f"Ignoring video: {data.get('title', url)}")
         return
+
+    file_name = construct_filename(data['title'], site_config, general_config)
 
     destination_config = general_config['download_destinations'][0]
 
@@ -287,10 +299,8 @@ def download_file(url, destination_path, site_config, general_config):
     logger.debug(f"Executing command: {command}")
 
     if 'yt-dlp' in command:
-        # yt-dlp method (for PH)
         success = download_with_ytdlp(command)
     else:
-        # curl/wget method (for IF)
         success = download_with_curl_wget(command)
 
     if success:
@@ -408,11 +418,21 @@ def handle_vpn(general_config, action='start'):
     except subprocess.CalledProcessError as e:
         logger.error(f"Failed to execute VPN action '{action}': {e}")
 
+def process_direct_link(url, general_config):
+    for site_config_file in os.listdir(CONFIG_DIR):
+        if site_config_file.endswith('.yaml'):
+            site_config = load_site_config(site_config_file[:-5])  # Remove .yaml extension
+            if url.startswith(site_config['base_url']):
+                logger.info(f"Detected direct link for site: {site_config_file[:-5]}")
+                headers = general_config.get('headers', {}).copy()  # Create a copy of the headers
+                headers['User-Agent'] = random.choice(general_config['user_agents'])  # Add a random User-Agent
+                process_video_page(url, site_config, general_config, overwrite_files=True, headers=headers)
+                return True
+    return False
+
 def main():
     parser = argparse.ArgumentParser(description='Video Scraper')
-    parser.add_argument('site', help='Site identifier (e.g., ph for Pornhub, if for IncestFlix)')
-    parser.add_argument('mode', help='Scraping mode (e.g., video, search, model, category, channel)')
-    parser.add_argument('identifier', help='Identifier (e.g., video ID, search terms, model name, category name)')
+    parser.add_argument('args', nargs='+', help='Site identifier and mode, or direct URL')
     parser.add_argument('--debug', action='store_true', help='Enable debug logging')
     parser.add_argument('--overwrite_files', action='store_true', help='Overwrite existing files')
     args = parser.parse_args()
@@ -422,28 +442,45 @@ def main():
     logger.add(sys.stderr, level=log_level)
 
     general_config = load_config(os.path.join(SCRIPT_DIR, 'config.yaml'))
-    site_config = load_site_config(args.site)
 
-    # Start VPN if enabled
-    handle_vpn(general_config, 'start')
+    # Check if it's a direct link
+    if len(args.args) == 1 and args.args[0].startswith('http'):
+        if process_direct_link(args.args[0], general_config):
+            return
+        else:
+            logger.error("Unrecognized URL. Please provide a supported direct link or use the standard command format.")
+            sys.exit(1)
 
-    if args.mode not in site_config['modes']:
-        logger.error(f"Unsupported mode '{args.mode}' for site '{args.site}'")
+    # Standard command format
+    if len(args.args) < 3:
+        logger.error("Invalid number of arguments. Please provide site, mode, and identifier.")
         sys.exit(1)
 
-    if args.mode == 'video':
-        url = construct_url(site_config['base_url'], site_config['modes'][args.mode]['url_pattern'], site_config, video_id=args.identifier)
+    site, mode, identifier = args.args[0], args.args[1], ' '.join(args.args[2:])
+    site_config = load_site_config(site)
+
+    # Extract headers from general_config
+    headers = general_config.get('headers', {})
+
+    handle_vpn(general_config, 'start')
+
+    if mode not in site_config['modes']:
+        logger.error(f"Unsupported mode '{mode}' for site '{site}'")
+        sys.exit(1)
+
+    if mode == 'video':
+        url = construct_url(site_config['base_url'], site_config['modes'][mode]['url_pattern'], site_config, video_id=identifier)
     else:
-        url = construct_url(site_config['base_url'], site_config['modes'][args.mode]['url_pattern'], site_config, **{args.mode: args.identifier})
+        url = construct_url(site_config['base_url'], site_config['modes'][mode]['url_pattern'], site_config, **{mode: identifier})
 
     try:
-        if args.mode == 'video':
-            process_video_page(url, site_config, general_config, args.overwrite_files)
+        if mode == 'video':
+            process_video_page(url, site_config, general_config, args.overwrite_files, headers)
         else:
             current_page = 1
             while url:
                 logger.info(f"Processing: {url}")
-                next_page, new_page_number = process_list_page(url, site_config, general_config, current_page, args.mode, args.identifier, args.overwrite_files)
+                next_page, new_page_number = process_list_page(url, site_config, general_config, current_page, mode, identifier, args.overwrite_files, headers)
                 if next_page is None:
                     break
                 url = next_page
@@ -451,10 +488,6 @@ def main():
                 time.sleep(general_config['sleep']['between_pages'])
     except KeyboardInterrupt:
         logger.warning("Script interrupted by user. Exiting gracefully...")
-    finally:
-        # Stop VPN if it was started
-        if general_config.get('vpn', {}).get('enabled', False):
-            handle_vpn(general_config, 'stop')
 
     logger.info("Scraping process completed.")
 
