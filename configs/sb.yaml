@@ -1,0 +1,55 @@
+name: SpankBang
+domain: spankbang.com
+base_url: "https://spankbang.com"
+selector_style: css
+url_encoding_rules:
+  " ": "+"
+  "%20": "+"
+
+modes:
+  video:
+    url_pattern: "/{video_id}/video/{title}"
+    scraper: video_scraper
+  model:
+    url_pattern: "/pornstar/{model}/"
+    scraper: list_scraper
+  search:
+    url_pattern: "/s/{search}/?o=all/"
+    scraper: list_scraper
+  tag:
+    url_pattern: "/s/{tag}/?o=all/"
+    scraper: list_scraper
+
+download:
+  command: 'yt-dlp -o "{destination_path}" "{url}"'
+
+scrapers:
+  video_scraper:
+    title:
+      selector: "head title"
+    download_url:
+      selector: "meta[property='og:video']"
+      attribute: "content"
+
+  list_scraper:
+    video_container:
+      selector:
+        - "div.video-list.video-rotate.video-list-with-ads"
+    video_item:
+      selector: "div.video-item"
+      fields:
+        video_key:
+          selector: "a.thumb"
+          attribute: "href"
+        title:
+          selector: "a.thumb"
+          attribute: "title"
+        url:
+          selector: "a.thumb"
+          attribute: "href"
+    pagination:
+      subsequent_pages: "https://spankbang.com/s/{search}/{page}/2/?o=all/"
+
+video_key_pattern: "/"
+
+name_suffix: " - SpankBang"
