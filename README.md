@@ -73,7 +73,7 @@ Some sites have other list modes besides `search`. The following sites and modes
 In addition to the modes specified for each site, you can always download individual videos using the direct URL, e.g.:
 
 ```
-./scrape https://spankbang.com/5y2rd/video/chloe+night+shower+with+brother
+scrape https://spankbang.com/5y2rd/video/chloe+night+shower+with+brother
 ```
 
 # Contributions
