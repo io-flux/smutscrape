@@ -49,7 +49,7 @@ def construct_url(base_url, pattern, site_config, **kwargs):
     encoded_kwargs = {}
     for k, v in kwargs.items():
         if isinstance(v, str):
-            encoded_v = urllib.parse.quote(v)
+            encoded_v = v
             for original, replacement in encoding_rules.items():
                 encoded_v = encoded_v.replace(original, replacement)
             encoded_kwargs[k] = encoded_v
@@ -58,6 +58,7 @@ def construct_url(base_url, pattern, site_config, **kwargs):
 
     path = pattern.format(**encoded_kwargs)
     return urllib.parse.urljoin(base_url, path)
+
 
 def fetch_page(url, user_agents, headers):
     if 'User-Agent' not in headers:
@@ -173,16 +174,26 @@ def process_list_page(url, site_config, general_config, current_page=1, mode=Non
 
         if mode is not None and mode in site_config['modes']:
             logger.debug(f"URL pattern: {site_config['modes'][mode]['url_pattern']}")
-            url_pattern = site_config['modes'][mode]['url_pattern'].format(**{mode: identifier})
+
+            # Apply url_encoding_rules to the identifier
+            encoded_identifier = identifier
+            for original, replacement in site_config.get('url_encoding_rules', {}).items():
+                encoded_identifier = encoded_identifier.replace(original, replacement)
+
+            logger.debug(f"Encoded identifier: {encoded_identifier}")
+
+            url_pattern = site_config['modes'][mode]['url_pattern'].format(**{mode: encoded_identifier})
         else:
             logger.warning(f"Invalid mode: {mode}. Using current URL as pattern.")
             url_pattern = url
+
+        logger.debug(f"URL pattern after formatting: {url_pattern}")
 
         if 'subsequent_pages' in pagination_config:
             next_url = pagination_config['subsequent_pages'].format(
                 url_pattern=url_pattern,
                 page=current_page + 1,
-                search=identifier
+                search=encoded_identifier
             )
         else:
             next_page = soup.select_one(pagination_config.get('next_page', {}).get('selector', ''))
@@ -198,6 +209,7 @@ def process_list_page(url, site_config, general_config, current_page=1, mode=Non
 
     logger.debug("No next page found or reached maximum pages")
     return None, None
+
 
 def should_ignore_video(data, ignored_terms):
     for term in ignored_terms:
