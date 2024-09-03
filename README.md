@@ -79,7 +79,7 @@ The following sites and modes are presently supported:
 #### 👧 *To download all videos from 9vids.com's "sister" search results:*
 
 ```bash
-./scrape.py 9v search sister` 
+./scrape.py 9v search sister
 ```
 
 #### 🦉 *To download all videos from the model "owlcrystal" on pornhub.com:*
@@ -90,7 +90,7 @@ The following sites and modes are presently supported:
 #### 🛀🧒🏻💦👩🏻 *To download the video "Taboo mom son bath" from SpankBang:*
 
 ```bash
-./scrape https://spankbang.com/2ei5s/video/taboo+mom+son+bath
+./scrape.py https://spankbang.com/2ei5s/video/taboo+mom+son+bath
 ```
 
 ### Symlink Usage 🔗
